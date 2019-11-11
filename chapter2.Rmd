@@ -1,7 +1,67 @@
-# Insert chapter 2 title here
+# Regression analysis and model validation
 
 *Describe the work you have done this week and summarize your learning.*
 
 - Describe your work and results clearly. 
 - Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.
 - Assume the reader has no previous knowledge of your data or the more advanced methods you are using.
+
+## Task 1
+imported_data <-read.csv(file="learning2014.csv")
+
+str(imported_data)
+
+dim(imported_data)
+
+head(imported_data)
+
+> Our data are based on an international survey of Approaches to Learning, which was conducted in 2014-2015 in Finland. Results were later used for teaching purposes. There were 183 respondents in total. However, our data frame includes only 166 observations and 7 variables.
+
+## Task 2
+
+### Visualizing the data
+pairs(imported_data)
+
+pairs(imported_data[-1]) #scatter matrix of the variables without gender
+
+### Alternatively: access the GGallz and ggplot2 libraries
+install.packages("GGally")
+
+install.packages("ggplot2")
+
+library(GGally)
+
+library(ggplot2)
+
+p <- ggpairs(imported_data, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+p
+
+### Summary of the variables
+summary(imported_data)
+
+> Exactly 110 women and 56 were asked in the survey. From the summary we can see that the median for age is 22, so the survey focused primarily on young people. However, from the boxplot we can see that there are quite a lot of outliers. Attitude is distributed around 30 with a higher average value for men. Distribution of variable deep is skewed to the left with few outliers with low values. On the other hand, distribution of stra is nicely symmetric. The same applies to distribution of surf. Finally, the distribution of points is centered approximately around 20 and slightly skewed to the left.
+The highest magnitude of correlation is between attitude and points and is equal to 0.437, which means that these variables will vary a lot depending on each other. This relationship is positive, meaning that first variable will increase as the second variable increase and vice versa. Other relationships between variables are not that strong. However, some of them are negative.
+
+## Task 3
+regression_model <- lm(Points ~ Attitude + Age + stra, data = imported_data)
+
+summary(regression_model)
+
+> According to our results, the only statistically significant variable is attitude (significant at 1% significance level) - we can see that from the p-value. We can also calculate whether the variable is statistically significant or not using the t-test (if we know the significance level).
+
+regression_model_adjusted <- lm(Points ~ Attitude, data = imported_data)
+
+summary(regression_model_adjusted)
+
+## Task 4
+>  From the summary of the regression_model, we can see that if the attitude increase (decrease) by 1 unit, the points will increase (decrease) by 0.34808. Multiple R-squared is equal to 0.2182, which means that attitude explains approximatelly 22% of the variation in points. Without statistically insignificant variables (age and stra), the estimate of attitude gets even bigger (slightly over 0.35) and our multiple R-squared is in this case equal to 0.1906. So attitude explains 19% of tha variation in points.
+
+## Task 5
+par(mfrow = c(2,2))
+
+plot(regression_model_adjusted, which = c(1, 2, 5))
+
+> Residuals vs Fitted values is the most frequently used plot. It helps us detect non-linearity, unequal error variances and outliers. In our case it looks that our model is linear, but there seems to be few outliers with very high negative values of residuals. Normal Q-Q plot compares two distributions (usually sample of data on one axis to a statistical population on second axis). It seems that our data fit the theoretical ones pretty well. Although there are some outliers at he low and high end of the range. Finally, Residuals vs Leverage plot helps us identify influential data points in our model, such as outliers (but not only outliers). There are no influential points in our model, since there are no points outside the red dashed Cook's distance line (although there is one point on the line).
+
+
