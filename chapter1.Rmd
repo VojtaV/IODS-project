@@ -7,7 +7,5 @@
 
 > The first impressions of the course are **very good** and I am sure that the learning outcomes will be **very useful**. I am looking forward to learning how to work with R since I will need it during work on my bachelor thesis. After this course, I mainly expect to be able to work with large datasets and be able to run regressions on them. I already know some basics of programming in R, because I was learning it a little in my home school in Czechia. Anyway, I am here in Helsinki on Erasmus and one of the Finnish students recommended me this course, so I took it.
 
-### GitHub repository
+## GitHub repository
 [link](https://github.com/VojtaV/IODS-project.git)
-
-
