@@ -1,0 +1,87 @@
+# Logistic regression
+
+## Task 2
+
+### Reading the data, printing the names of the variables in the data and exploring the structure and dimensions of the data
+```{r}
+data <- read.csv(file = "StudentData.csv")
+colnames(data)
+summary(data)
+str(data)
+dim(data)
+```
+> There are 382 observations and 35 variables in our dataset. The data showing achievements of students in secondary education of two Portuguese schools.We are using two datasets and trying to observe the performance of the students in mathematics and portuguese language with regard to consumption of alcohol and other social and school related features.
+
+## Task 3
+
+### 4 variables in the dataset and my hypothesis about their relationships with alcohol consumption
+* failures: This numeric variable shows us how many classes each student failed in the past. My hypothesis is that with high alcohol consumption, the student will fail more classes that wit low alcohol consumption. On the other hand, variable which shows us how much alcohol student consume might increase when student pass the class (perhaps because he is celebrating successful exam) . This would imply that the alcohol consumption is actually higher when the number of failed classes is low. However, I still think that this will not be the case and that consumption of alcohol and number of failed classes are positively correlated.
+
+* health: The higher the consumption of alcohol, the worse the health of a student will be.
+
+* absences: This variable will be also positively correlated with consumption of alcohol, since students might be drinking instead of attending school. They may also have a hangover after a drinking evening and therefore not go to school.
+
+* G3 (final grade): Final grand probably tend to be lower with higher consumption oc alcohol. However, similar thing as in the case oc variable "failures" may apply here. Students may be drinking after they receive a  nice final grade.
+
+## Task 4
+
+### Distributions of chosen variables
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+selected_variables <- select(data, one_of(c("failures", "health", "absences", "G3", "alc_use")))
+gather(selected_variables) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+```
+
+> From the graps we can clearly see the distributions of the variables. In case of variable "alc_use", value 1 corresponds to very low consumption and value 5 to very high consumption. In case of variable "health, value 1 corresponds to very bad current health status and value 5 to very good current health status. Value 0 in variable "failures" means no failure at all.
+
+### Exploring relationships between chosen variables and alcohol consumption
+```{r}
+library(GGally)
+library(ggplot2)
+
+# Creating a plot matrix
+selected_variables <- select(data, one_of(c("failures", "health", "absences", "G3", "alc_use")))
+p <- ggpairs(selected_variables, mapping = aes(alpha=0.3), lower = list(combo = wrap("facethist", bins = 20)))
+p
+```
+
+> From this graph we can see again distribution of each variable and also some other interesting things. We can see how variables are correlated to each other. From our chosen variables, the variable "absences" is the one which is influenced the most by the consumption of alcohol , since they have the highest value of correlation coefficient (0.215). Final grade (G3) is the only variable which is in negative relationship with the alcohol consumption. Those results are quite similar to my predictions, although one different and kind of interesting result is that health and alcohol consumption are positively correlated (although the correlation coefficient is very low).
+
+## Task 5
+
+### Applying logistic regression
+```{r}
+m <- glm(high_use ~ failures + health + absences + G3, data = data, family = "binomial")
+summary(m)
+```
+> From the summary of the fitted model we can see that variales failures and absences are statistically significant. Variable failures is significant at 95% significance level, meanwhile variable absences at 99% with very low p-value. Other variables are statistically insignificant.
+
+### Computing odds ratios and confidence intervals
+```{r}
+OR <- coef(m) %>% exp
+CI <- confint(m) %>% exp
+cbind(OR, CI)
+```
+> From the odds ratios we can see what happens our target variable (high consumption of alcohol) when one of the variables increases by 1 unit. So if number of failures increases by 1, the odds that the student will consume large amounts of alcohol increases by 48.2%. If health increases by 1, the odds increases by 7.7% and if absences increases by 1, the odds increases by 8.9%. The only value of odds ratio which is lower than 1 is related to G3 (final grade). That means that the student with higher final grade is less likely to consume a lot of alcohol than student with worse higher grade. The only variable which seemed to be statistically insignificant is health.
+
+## Task 6
+
+### Exploring the predictive power of our model
+```{r}
+m2 <- glm(high_use ~ failures + absences + G3, data = data, family = "binomial")
+probabilities <- predict(m2, type = "response")
+data <- mutate(data, probability = probabilities)
+data <- mutate(data, prediction = probability > 0.5)
+table(high_use = data$high_use, prediction = data$prediction)
+```
+> From the total of 382 students, our model correctly predicted 274 of them and 108 incorrectly.
+
+```{r}
+g <- ggplot(data, aes(x = probability, y = high_use, col = prediction))
+g + geom_point()
+```
+
+> The total proportion of inaccurately classified individuals is 0.26 (98/382), meaning that approximatelly every fourth guess is wrong.
