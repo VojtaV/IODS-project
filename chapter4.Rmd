@@ -1,0 +1,158 @@
+# Clustering and classification
+
+## Task 2
+
+### Loading the data and exploring them
+```{r}
+library(MASS)
+data("Boston")
+str(Boston)
+dim(Boston)
+```
+> Boston dataset is desrcribing housing values in suburbs of Boston with 14 variables (such as crime rate) and 506 observations.
+
+## Task 3
+
+### Overview of the data and summaries of the variables
+```{r}
+summary(Boston)
+```
+
+### Exploring the distribution of the variables
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+gather(Boston) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_histogram()
+```
+
+> From the histograms above we can see the distribution of each variable. Some of the variables such as rm are quite nicely normally distributed. On the other hand, some variables are shewed. Age variables is skewed to the left, meaning that there is a huge proportion of owner-occupied units built prior to 1940. Dis variable is skewed to the right, meaning that the distances to Boston employment centres are quite small.
+
+### Exploring the correlation between variables
+```{r}
+install.packages("corrplot")
+library(corrplot)
+
+cor_matrix <- cor(Boston) #correlation matrix
+
+cor_matrix
+```
+
+```{r}
+corrplot(cor_matrix, method="circle", type="upper")
+```
+
+> Corrplot function provides us nice graphical represantion of correlation matrix. We can see that some of the variables are negatively correlated (such as indus and dis or lstat and medv) and some are positively correlated (such as indus and nox or indux and tax). Obviously, each variable is correlated with itself with correlation coefficient equal to 1.
+
+### Task 4
+
+### Scaling the data
+```{r}
+scaled_data <- scale(Boston)
+
+summary(scaled_data)
+```
+> Scaled data are different from the original ones. We substracted the mean from each observation and divided this number with standard deviation.
+
+```{r}
+class(scaled_data)
+
+scaled_data <- as.data.frame(scaled_data)
+
+bins <- quantile(scaled_data$crim) 
+
+crime <- cut(scaled_data$crim, breaks = bins, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high")) #creating categorical variable crime
+
+table(crime)
+```
+> Crime is divided into 4 categories: low, med_low, med_high, high.
+
+```{r}
+scaled_data <- dplyr::select(scaled_data, -crim) #removing the old crime rate variable
+
+scaled_data <- data.frame(scaled_data, crime) #adding the new crime rate variable
+
+n <- nrow(scaled_data)
+
+ind <- sample(n,  size = n * 0.8) #taking 80% of the data
+
+# dividing the dataset into train and test sets
+train <- scaled_data[ind,]
+test <- scaled_data[-ind,]
+
+colnames(test)
+```
+
+```{r}
+dim(test)
+```
+
+## Task 5
+
+### Fitting the linear discriminant analysis (lda) on the train set
+```{r}
+lda.fit <- lda(crime ~ ., data = train)
+
+#the function for lda biplot arrows
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "blue", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+
+classes <- as.numeric(train$crime) #target classes as numeric
+
+#plotting the lda results
+plot(lda.fit, dimen = 2, col = classes, pch = classes)
+lda.arrows(lda.fit, myscale = 3)
+```
+
+## Task 6
+
+```{r}
+correct_classes <- test$crime #saving the crime categories from the test set
+
+test <- dplyr::select(test, -crime) #removing the categorical crime variable from the test dataset
+```
+
+```{r}
+predictions <- predict(lda.fit, newdata = test) #predicting the classes with the lda model on the test data
+
+#cross tabulating the results with the crime categories from the test set
+table(correct = correct_classes, predicted = predictions$class)
+```
+
+## Task 7
+
+```{r}
+#euclidean distance matrix
+dist_eu <- dist(scaled_data)
+
+#look at the summary of the distances
+summary(dist_eu)
+```
+> The distances are between 0.14 and 13.
+
+```{r}
+#manhattan distance matrix
+dist_man <- dist(scaled_data, method = 'manhattan')
+
+#look at the summary of the distances
+summary(dist_man)
+```
+> The distances are between 0.28 and 46.89.
+
+```{r}
+k_max <- 10
+
+#calculate the total within sum of squares
+twcss <- sapply(1:k_max, function(k){kmeans(boston, k)$tot.withinss})
+
+#visualize the results
+qplot(x = 1:k_max, y = twcss, geom = 'line')
+```
+
