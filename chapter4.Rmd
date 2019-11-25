@@ -30,18 +30,8 @@ gather(Boston) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geo
 > From the histograms above we can see the distribution of each variable. Some of the variables such as rm are quite nicely normally distributed. On the other hand, some variables are shewed. Age variables is skewed to the left, meaning that there is a huge proportion of owner-occupied units built prior to 1940. Dis variable is skewed to the right, meaning that the distances to Boston employment centres are quite small.
 
 ### Exploring the correlation between variables
-```{r}
-install.packages("corrplot")
-library(corrplot)
 
-cor_matrix <- cor(Boston) #correlation matrix
 
-cor_matrix
-```
-
-```{r}
-corrplot(cor_matrix, method="circle", type="upper")
-```
 
 > Corrplot function provides us nice graphical represantion of correlation matrix. We can see that some of the variables are negatively correlated (such as indus and dis or lstat and medv) and some are positively correlated (such as indus and nox or indux and tax). Obviously, each variable is correlated with itself with correlation coefficient equal to 1.
 
@@ -146,13 +136,4 @@ summary(dist_man)
 ```
 > The distances are between 0.28 and 46.89.
 
-```{r}
-k_max <- 10
-
-#calculate the total within sum of squares
-twcss <- sapply(1:k_max, function(k){kmeans(boston, k)$tot.withinss})
-
-#visualize the results
-qplot(x = 1:k_max, y = twcss, geom = 'line')
-```
 
