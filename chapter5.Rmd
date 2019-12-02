@@ -24,5 +24,57 @@ ggpairs(HumanData_numeric)
 ```{r}  
 pca <- prcomp(HumanData_numeric)
 summary(pca) # From summary can be seen that almost all variation can be explained by PC1
+```
+
+```{r}
 biplot(pca, choices = 1:2, cex = c(0.8, 1), col = c("blue", "red"))
+```
+
+## Task 3
+
+### Standardizing variables
+```{r}
+HumanData_st <- scale(HumanData_numeric)
+summary(HumanData_st)
+```
+> Mean became 0.
+
+```{r}
+pca_st <- prcomp(HumanData_st)
+summary(pca_st) 
+```
+> Comparing this summary to the summary without standardization, variation is in this case better (more evenly) distributed across the components. After standardization our results seems much more satisfying, since we can better see how each variable affect the variations in the model.
+
+```{r}
+biplot(pca_st, choices = 1:2, cex = c(0.8, 1), col=c("blue","red"))
+```
+
+## Task 4
+
+### Interpretations of the first two principal component dimensions 
+> In general it holds that the first principal component (PC1) captures the most variation in the data and the second principal component (PC2) captures the second most variation in the data. From the last graph we cann see that variables such as Mat.Mor and Ado.Birth have large positive influence on PC1. On the other hand, variables such as Edu.Exp, GNI, Edu2.PM and Life.Exp have negative influence on PC1. Those variables I just mentioned have almost no influence on PC2. Variables Parli.F and Labo.FM have a positive influence on PC2. Also note that from summary we can see that PC1 and PC2 together explains approximately 70% of the variation. From the angles between arrows we can say what is the correlation between the two corresponding features. For example there is high positive correlation between variables Mat.Mor and Ado.Birht, since there is small angle between their arrows.There is also almost no correlation between some variables. For instance arrow corresponding to Mat.Mor. is almost orthogonal to the arrow corresponding to Parli.F, thus there is very low correlation between those two variables.
+
+## Task 5
+
+### Loading the tea dataset and exploring the data
+```{r}
+if (!require("devtools")) install.packages("devtools")
+library(devtools)
+install_github("husson/FactoMineR")
+
+library(FactoMineR)
+library(dplyr)
+library(tidyr)
+data(tea)
+str(tea)
+dim(tea)
+chosen_tea <- tea[,c(3,6,11,14)]
+str(chosen_tea)
+mca_model <- MCA(chosen_tea)
+summary(mca_model)
+```
+> From the summary above we can get some interestng things. From eigenvalues part we can see percentage of variances retained by each dimension. Individuals part tells us the percentge contribution of each variable on the dimension. From the column v.test we can say wheather the variable is statistically significant from zero or not. In our case, almost all variables are statistically significant in each dimension. Section categorical variables tells us link (correlation) between the variable and dimension. In our case there is not a strong link between variables and dimensions. The strongest one is between resto variable a first dimension, where the correlation equals 0.675.
+
+```{r}
+plot(mca_model, invisible=c("ind"))
 ```
