@@ -2,13 +2,13 @@
 
 ## Task 1
 
-## Reading the data a showing summaries of the data
+### Reading the data a showing summaries of the data
 ```{r}
 Human_data <- read.csv(file = "human.csv")
 summary(Human_data) # Summary of the data
 ```
 
-## Distribution of the variables and relationships between them
+### Distribution of the variables and relationships between them
 ```{r}
 library(GGally)
 HumanData_numeric <- Human_data[,-1]
@@ -19,3 +19,10 @@ ggpairs(HumanData_numeric)
 > Looking at a plot matrix above, we can nicely seee distribution of each variable on the diagonale and also correlation between each pair of variables. Some variables such a Edu2.FM and Edu.Exp have a nice normal distribution (although Edu.2FM is slightly skewed to the left). GNI is strongly skewed to the right, which means that the gross national income per capita is quite small on average. Variable Mat.Mor is also skewed to hte right meaning that maternal mortality ration is quite low in most countries. With regard to relationships between variables, we can see that are mostly positive relationships. Strong positive relationship is between life expectancy at birth and expected years of schooling. The strongest negative relationship is between maternal mortality ration and life expectancy at birth, here the correlation coefficient is equal to -0.857.
 
 ## Task 2
+
+### Performing principal component analysis
+```{r}  
+pca <- prcomp(HumanData_numeric)
+summary(pca) # From summary can be seen that almost all variation can be explained by PC1
+biplot(pca, choices = 1:2, cex = c(0.8, 1), col = c("blue", "red"))
+```
