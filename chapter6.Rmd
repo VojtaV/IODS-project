@@ -1,0 +1,110 @@
+# Analysis of longitudinal data
+
+## Task 1
+
+### Reading the data
+```{r}
+RATS <- read.csv("RATSL.csv")
+
+sapply(RATS, class)
+```
+> Categorical variables ID and Group are still in integer form, we need to convert them into the factors. Also note that time is a factor variable, we need to convert it into numeric one.
+
+```{r}
+RATS$ID <- as.factor(RATS$ID)
+RATS$Group <- as.factor(RATS$Group)
+
+RATS$time <- as.numeric(RATS$time)
+
+sapply(RATS, class)
+```
+
+### Drawing the plot of RATS
+```{r}
+library(ggplot2)
+
+ggplot(RATS, aes(x = time, y = gram, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(RATS$gram), max(RATS$gram)))
+```
+
+### Standardizing the variable gram
+```{r}
+library(dplyr)
+library(tidyr)
+
+RATS <- RATS %>%
+  group_by(time) %>%
+  mutate(std_gram = (gram - mean(gram))/sd(gram) ) %>%
+  ungroup()
+
+glimpse(RATS)
+```
+
+### Drawing the plot of RATS with standardised variable gram
+```{r}
+ggplot(RATS, aes(x = time, y = std_gram, linetype = ID)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  scale_y_continuous(name = "standardized gram")
+```
+
+### Summarazing data with mean and standard error of gram by group and time and ploting the mean profiles
+```{r}
+n <- RATS$time %>% unique() %>% length()
+
+RATSS <- RATS %>%
+  group_by(Group, time) %>%
+  summarise( mean = mean(gram), se = sd(gram)/sqrt(n) ) %>%
+  ungroup()
+
+ggplot(RATSS, aes(x = time, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  scale_linetype_manual(values = c(1,2,3)) +
+  geom_point(size=3) +
+  scale_shape_manual(values = c(1,2,3)) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se, linetype="1"), width=0.3) +
+  theme(legend.position = c(0.8,0.8)) +
+  scale_y_continuous(name = "mean(gram) +/- se(gram)")
+```
+
+### Creating a summary data by group and ID with mean as the summary variable and drawing a boxplot of the mean versus Group
+```{r}
+RATSSS <- RATS %>%
+  filter(time > 0) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(gram) ) %>%
+  ungroup()
+
+ggplot(RATSSS, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(gram), weeks 1-8")
+```
+
+## Task 2
+
+### Reading the data
+```{r}
+BPRS <- read.csv("BPRSL.csv")
+
+sapply(BPRS, class)
+```
+> Categorical variables treatment and subject are still in integer form, we need to convert them into the factors. Also note that variable weeks is a factor variable, we need to convert it into numeric one.
+
+```{r}
+BPRS$treatment <- as.factor(BPRS$treatment)
+BPRS$subject <- as.factor(BPRS$treatment)
+
+BPRS$weeks <- as.numeric(BPRS$weeks)
+
+sapply(BPRS, class)
+```
+
+
+
+
