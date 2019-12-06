@@ -66,3 +66,6 @@ str(RATSL)
 summary(RATSL)
 
 ## Comparing now the datasets to their original (wide) form, now our data are better arranged and easier to read. Number of variables in each dataset shrinked, but number of observations increased.
+
+write.csv(BPRSL, file = "BPRSL.csv", row.names = FALSE)
+write.csv(RATSL, file = "RATSL.csv", row.names = FALSE)
