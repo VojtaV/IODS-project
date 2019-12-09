@@ -31,6 +31,8 @@ ggplot(RATS, aes(x = time, y = gram, linetype = ID)) +
   scale_y_continuous(limits = c(min(RATS$gram), max(RATS$gram)))
 ```
 
+> The gram values of the Group 1 stays pretty much constant during the observed period and do not go over value of 300. However, the gram values for Group 1 and 2 are increasing over the first 8 weeks and then decreasing rapidly in the last week. 
+
 ### Standardizing the variable gram
 ```{r}
 library(dplyr)
@@ -53,6 +55,8 @@ ggplot(RATS, aes(x = time, y = std_gram, linetype = ID)) +
   scale_y_continuous(name = "standardized gram")
 ```
 
+> From the standardized curves we can better see the tracking phenomenon. Comparing this graph to the one with unstandardized values, the gram values of the second and third group stay the same over the whole period.
+
 ### Summarazing data with mean and standard error of gram by group and time and ploting the mean profiles
 ```{r}
 n <- RATS$time %>% unique() %>% length()
@@ -72,6 +76,8 @@ ggplot(RATSS, aes(x = time, y = mean, linetype = Group, shape = Group)) +
   scale_y_continuous(name = "mean(gram) +/- se(gram)")
 ```
 
+> The mean profiles of the second and third group follow the same pattern, although the mean profile of the third group is little bit higher on average. On the other hand, there is a huge difference between the first group and the other two groups with respect to the mean gram values, the mean profile of the first group is much lower comparing to other groups.
+
 ### Creating a summary data by group and ID with mean as the summary variable and drawing a boxplot of the mean versus Group
 ```{r}
 RATSSS <- RATS %>%
@@ -85,6 +91,8 @@ ggplot(RATSSS, aes(x = Group, y = mean)) +
   stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white") +
   scale_y_continuous(name = "mean(gram), weeks 1-8")
 ```
+
+> The black dots indicates, that there is an outlier in each group. Regarding the first and third group, the outlier is lower than other values. On the other hand, in the second group the outlier is much higher with a gram value equal almost to 600. We should consider remove those outliers, so they do not bias our results. Note also that the distribution of the second group is somewhat skewed.
 
 ## Task 2
 
